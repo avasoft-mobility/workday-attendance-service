@@ -9,6 +9,10 @@ import {
 
 const router = express.Router();
 
+router.get("/check", (req, res) => {
+  return res.send("Attendance Service is working fine");
+});
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     if (req.query["userId"] && req.query["date"]) {
@@ -26,7 +30,7 @@ router.get("/", async (req: Request, res: Response) => {
         req.query["fromDate"] as string,
         req.query["toDate"] as string
       );
-      
+
       return res.status(200).json(attendanceArray);
     }
 

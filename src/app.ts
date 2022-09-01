@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { attendanceRouter } from "./router/AttendanceRouter";
 import dotenv from "dotenv";
+import serverless from "serverless-http";
 
 dotenv.config();
 
@@ -19,6 +20,10 @@ app.get("/", (request: Request, response: Response) => {
 
 app.use("/attendance", attendanceRouter);
 
-app.listen(process.env.PORT_NUMBER!, () => {
-  console.log(`Server is listening on port ${process.env.PORT_NUMBER}`);
-});
+if (process.env.LAMBDA !== "TRUE") {
+  app.listen(process.env.PORT_NUMBER!, () => {
+    console.log(`Server is listening on port ${process.env.PORT_NUMBER}`);
+  });
+}
+
+module.exports.lambdaHandler = serverless(app);

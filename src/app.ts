@@ -4,10 +4,13 @@ import mongoose from "mongoose";
 import { attendanceRouter } from "./router/AttendanceRouter";
 import dotenv from "dotenv";
 import serverless from "serverless-http";
+import runMiddleware from "run-middleware";
 
 dotenv.config();
 
 const app = express();
+runMiddleware(app);
+
 app.use(json());
 
 mongoose.connect(process.env.DB_STRING!, () => {
@@ -19,6 +22,24 @@ app.get("/", (request: Request, response: Response) => {
 });
 
 app.use("/attendance", attendanceRouter);
+
+app.use(
+  "/attendance/*/functions/AttendancesFunction/invocations",
+  (req: Request, res: Response) => {
+    const payload = JSON.parse(Buffer.from(req.body).toString());
+    (app as any).runMiddleware(
+      payload.path,
+      {
+        method: payload.httpMethod,
+        body: payload.body,
+        query: payload.queryParams,
+      },
+      function (code: any, data: any) {
+        res.json(data);
+      }
+    );
+  }
+);
 
 if (process.env.LAMBDA !== "TRUE") {
   app.listen(process.env.PORT_NUMBER!, () => {

@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import LambdaClient from "../helpers/LambdaClient";
 import { Rollbar } from "../helpers/Rollbar";
-import Attendance from "../models/Attendance.model";
 import AttendanceDb from "../schema/AttendanceSchema";
 import {
   getAttendanceForParticularDates,
   getAttendanceStatus,
+  updateOrCraeteAttendance,
 } from "../services/AttendenceSevice";
 
 const router = express.Router();
@@ -30,6 +30,39 @@ router.get("/users", async (req, res) => {
   const lambdaClient = new LambdaClient("Users");
   const response = await lambdaClient.post("/users/attendance");
   return res.send(response);
+});
+
+router.post("/", async (request: Request, response: Response) => {
+  try {
+    if (!request.query["userId"]) {
+      return response.status(400).json({ message: "userid is required" });
+    }
+
+    if (!request.query["date"]) {
+      return response.status(400).json({ message: "date is required" });
+    }
+
+    if (
+      request.body == null ||
+      request.body == undefined ||
+      (request.body.constructor === Object &&
+        Object.keys(request.body).length === 0)
+    ) {
+      return response.status(400).json({ message: "body is required" });
+    }
+
+    const result = await updateOrCraeteAttendance(
+      request.query["userId"] as string,
+      request.body["attendanceStatus"] as string,
+      request.query["date"] as string
+    )
+
+    return response.status(201).json(result);
+
+  } catch (error: any) {
+    Rollbar.error(error as unknown as Error, request);
+    return response.status(500).json({ message: error.message });
+  }
 });
 
 router.get("/", async (req: Request, res: Response) => {

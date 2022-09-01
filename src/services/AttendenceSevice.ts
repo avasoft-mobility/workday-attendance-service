@@ -48,4 +48,45 @@ const getAttendanceForParticularDates = async (
   return attendanceArray;
 };
 
-export { getAttendanceStatus, getAttendanceForParticularDates };
+const updateOrCraeteAttendance = async (
+  userId: string,
+  attendanceStatus: string,
+  date: string
+) => {
+  const parsedDate = new Date(date);
+  
+  const query = {
+    microsoftUserID: userId,
+    date: new Date(
+      new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate()
+      ).setHours(0, 0, 0, 0)
+    ),
+  };
+  const update = {
+    $set: {
+      microsoftUserID: userId,
+      date: new Date(
+        new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate()
+        ).setHours(0, 0, 0, 0)
+      ),
+      attendance_status: attendanceStatus,
+    },
+  };
+  const options = { upsert: true };
+
+  let result = await AttendanceDb.updateOne(query, update, options);
+
+  return result;
+};
+
+export {
+  getAttendanceStatus,
+  getAttendanceForParticularDates,
+  updateOrCraeteAttendance,
+};

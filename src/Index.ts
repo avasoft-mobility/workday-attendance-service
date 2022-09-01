@@ -1,21 +1,24 @@
 import { json } from "body-parser";
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
-import { AttendanceRouter } from "./router/AttendanceRouter";
+import { attendanceRouter } from "./router/AttendanceRouter";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(json());
+
+mongoose.connect(process.env.DB_STRING!, () => {
+  console.log("Connected to DB");
+});
 
 app.get("/", (request: Request, response: Response) => {
   return response.send("workday attendance service is healthy");
 });
 
-app.use("/attendance", AttendanceRouter)
+app.use("/attendance", attendanceRouter);
 
-mongoose.connect("mongodb://localhost:27017/workday", () => {
-  console.log("Connected to DB");
-});
-
-app.listen(3000, () => {
-  console.log("Server is listening on port 3000");
+app.listen(process.env.PORT_NUMBER!, () => {
+  console.log(`Server is listening on port ${process.env.PORT_NUMBER}`);
 });

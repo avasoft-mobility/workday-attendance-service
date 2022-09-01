@@ -4,6 +4,42 @@ import AttendanceDb from "../schema/AttendanceSchema";
 
 const router = express.Router();
 
+router.post("/", async (request: Request, response: Response) => {
+  try {
+    if (!request.query["userId"]) {
+      return response.status(400).json({ message: "userid is required" });
+    }
+
+    if (!request.query["date"]) {
+      return response.status(400).json({ message: "date is required" });
+    }
+
+    if (
+      request.body == null ||
+      request.body == undefined ||
+      (request.body.constructor === Object &&
+        Object.keys(request.body).length === 0)
+    ) {
+      return response.status(400).json({ message: "body is required" });
+    }
+
+    updateAttendance(
+      request.query["userId"] as string,
+      request.body["attendanceStatus"] as string,
+      request.query["date"] as string
+    )
+      .then((attendance) => {
+        return response.status(201).json(attendance);
+      })
+      .catch((error: Error) => {
+        return response.status(500).json({ message: error.message });
+      });
+  } catch (error: any) {
+    Rollbar.error(error as unknown as Error, request);
+    return response.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     if (req.query["userId"] && req.query["date"]) {
@@ -51,7 +87,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-async function getAttendance(userid: string, date: string) {
+const getAttendance = async (userid: string, date: string) => {
   try {
     const parsedDate = new Date(date);
 
@@ -71,13 +107,13 @@ async function getAttendance(userid: string, date: string) {
   } catch (error: any) {
     return { message: error.message };
   }
-}
+};
 
-async function getAttendanceRange(
+const getAttendanceRange = async (
   userid: string,
   fromDate: string,
   toDate: string
-) {
+) => {
   try {
     const query = {
       $and: [
@@ -91,6 +127,41 @@ async function getAttendanceRange(
   } catch (error: any) {
     return { message: error.message };
   }
-}
+};
+
+const updateAttendance = async (
+  userId: string,
+  attendanceStatus: string,
+  date: string
+) => {
+  const parsedDate = new Date(date);
+  const query = {
+    microsoftUserID: userId,
+    date: new Date(
+      new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate()
+      ).setHours(0, 0, 0, 0)
+    ),
+  };
+  const update = {
+    $set: {
+      microsoftUserID: userId,
+      date: new Date(
+        new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate()
+        ).setHours(0, 0, 0, 0)
+      ),
+      attendance_status: attendanceStatus,
+    },
+  };
+  const options = { upsert: true };
+
+  let result = await AttendanceDb.updateOne(query, update, options);
+  return result;
+};
 
 export { router as AttendanceRouter };

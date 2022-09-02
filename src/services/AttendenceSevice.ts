@@ -5,20 +5,7 @@ const getAttendanceStatus = async (
   date: string,
   userId: string
 ): Promise<string> => {
-  const parsedDate = new Date(date);
-
-  let query = {
-    microsoftUserID: userId,
-    date: new Date(
-      new Date(
-        parsedDate.getFullYear(),
-        parsedDate.getMonth(),
-        parsedDate.getDate()
-      ).setHours(0, 0, 0, 0)
-    ),
-  };
-
-  let attendance: Attendance[] = await AttendanceDb.find(query);
+  const attendance = await getAttendance(date, userId);
 
   var status =
     attendance.length > 0 ? attendance[0].attendance_status : "Not Filled";
@@ -48,4 +35,69 @@ const getAttendanceForParticularDates = async (
   return attendanceArray;
 };
 
-export { getAttendanceStatus, getAttendanceForParticularDates };
+const updateOrCraeteAttendance = async (
+  userId: string,
+  attendanceStatus: string,
+  date: string
+) => {
+  const parsedDate = new Date(date);
+
+  const query = {
+    microsoftUserID: userId,
+    date: new Date(
+      new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate()
+      ).setHours(0, 0, 0, 0)
+    ),
+  };
+  const update = {
+    $set: {
+      microsoftUserID: userId,
+      date: new Date(
+        new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate()
+        ).setHours(0, 0, 0, 0)
+      ),
+      attendance_status: attendanceStatus,
+    },
+  };
+  const options = { upsert: true };
+
+  let result = await AttendanceDb.updateOne(query, update, options);
+
+  const attendance = await getAttendance(date, userId);
+
+  return attendance;
+};
+
+const getAttendance = async (
+  date: string,
+  userId: string
+): Promise<Attendance[]> => {
+  const parsedDate = new Date(date);
+
+  let query = {
+    microsoftUserID: userId,
+    date: new Date(
+      new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate()
+      ).setHours(0, 0, 0, 0)
+    ),
+  };
+
+  let attendance: Attendance[] = await AttendanceDb.find(query);
+
+  return attendance;
+};
+
+export {
+  getAttendanceStatus,
+  getAttendanceForParticularDates,
+  updateOrCraeteAttendance,
+};

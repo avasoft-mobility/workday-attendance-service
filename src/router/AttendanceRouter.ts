@@ -35,11 +35,11 @@ router.get("/users", async (req, res) => {
 router.post("/", async (request: Request, response: Response) => {
   try {
     if (!request.query["userId"]) {
-      return response.status(400).json({ message: "userid is required" });
+      return response.status(400).send({ message: "userid is required" });
     }
 
     if (!request.query["date"]) {
-      return response.status(400).json({ message: "date is required" });
+      return response.status(400).send({ message: "date is required" });
     }
 
     if (
@@ -48,20 +48,19 @@ router.post("/", async (request: Request, response: Response) => {
       (request.body.constructor === Object &&
         Object.keys(request.body).length === 0)
     ) {
-      return response.status(400).json({ message: "body is required" });
+      return response.status(400).send({ message: "body is required" });
     }
 
     const result = await updateOrCraeteAttendance(
       request.query["userId"] as string,
       request.body["attendanceStatus"] as string,
       request.query["date"] as string
-    )
+    );
 
-    return response.status(201).json(result);
-
+    return response.status(201).send(result);
   } catch (error: any) {
     Rollbar.error(error as unknown as Error, request);
-    return response.status(500).json({ message: error.message });
+    return response.status(500).send({ message: error.message });
   }
 });
 
@@ -73,7 +72,7 @@ router.get("/", async (req: Request, res: Response) => {
         req.query["userId"] as string
       );
 
-      return res.status(200).json(status);
+      return res.status(200).send({ status: status });
     }
 
     if (req.query["userId"] && req.query["fromDate"] && req.query["toDate"]) {
@@ -83,16 +82,16 @@ router.get("/", async (req: Request, res: Response) => {
         req.query["toDate"] as string
       );
 
-      return res.status(200).json(attendanceArray);
+      return res.status(200).send(attendanceArray);
     }
 
     const response = await AttendanceDb.find();
-    return res.status(200).json(response);
+    return res.status(200).send(response);
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     return res
       .status(500)
-      .json({ message: (error as unknown as Error).message });
+      .send({ message: (error as unknown as Error).message });
   }
 });
 

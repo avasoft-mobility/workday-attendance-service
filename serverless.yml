@@ -1,0 +1,22 @@
+service: AVA-HIVE-NP-WORKDAY-ATTENDANCE-BE
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: dev
+  region: us-east-2
+  memorySize: 128
+  apiGateway:
+    restApiId: wqefm8ssja
+    restApiRootResourceId: fp8vr4aezh
+functions:
+  app:
+    handler: src/app.lambdaHandler
+    events:
+      - http:
+          path: /attendance
+          method: ANY
+          cors: true
+      - http:
+          path: /attendance/{proxy+}
+          method: ANY
+          cors: true

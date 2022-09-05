@@ -69,15 +69,16 @@ class LambdaClient {
       httpMethod: "GET",
       path: route,
       headers: { "content-type": "application/json" },
-      queryParams: queryParams ? queryParams : undefined,
+      queryParams: queryParams ? queryParams : {},
       isBase64Encoded: false,
     };
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 
   post = (route: string, queryParams?: Object, body?: Object) => {
@@ -85,17 +86,18 @@ class LambdaClient {
       httpMethod: "POST",
       path: route,
       headers: { "content-type": "application/json" },
-      queryParams: queryParams ? queryParams : undefined,
+      queryParams: queryParams ? queryParams : {},
       isBase64Encoded: false,
-      body: body ? body : undefined,
+      body: body ? body : {},
     };
 
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 
   put = (route: string, queryParams?: Object, body?: Object) => {
@@ -103,17 +105,18 @@ class LambdaClient {
       httpMethod: "PUT",
       path: route,
       headers: { "content-type": "application/json" },
-      queryParams: queryParams ? queryParams : undefined,
+      queryParams: queryParams ? queryParams : {},
       isBase64Encoded: false,
-      body: body ? body : undefined,
+      body: body ? body : {},
     };
 
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 
   delete = (route: string, queryParams?: Object, body?: Object) => {
@@ -123,15 +126,16 @@ class LambdaClient {
       headers: { "content-type": "application/json" },
       queryParams: queryParams ? queryParams : {},
       isBase64Encoded: false,
-      body: body ? body : undefined,
+      body: body ? body : {},
     };
 
-    return this.lambda
+    const response = this.lambda
       .invoke({
         Payload: JSON.stringify(Payload),
         FunctionName: this.FunctionName,
       })
       .promise();
+    return JSON.parse(response.Payload);
   };
 }
 

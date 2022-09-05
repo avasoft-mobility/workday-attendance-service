@@ -95,4 +95,37 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/bulk-retrieve", async (req: Request, res: Response) => {
+  try {
+    const userIds = req.body.userIds;
+    const date = req.body.date;
+
+    if (!userIds || (userIds as string[]).length === 0) {
+      return res.status(400).send({ message: "User ids must be passed" });
+    }
+
+    if (!date) {
+      return res.status(400).send({ message: "date must be passed" });
+    }
+
+    const parsedDate = new Date(date);
+    var usersAttendance = await AttendanceDb.find({
+      microsoftUserID: { $in: userIds as string[] },
+      date: new Date(
+        new Date(
+          parsedDate.getFullYear(),
+          parsedDate.getMonth(),
+          parsedDate.getDate()
+        ).setHours(0, 0, 0, 0)
+      ),
+    });
+    return res.send(usersAttendance);
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    return res
+      .status(500)
+      .send({ message: (error as unknown as Error).message });
+  }
+});
+
 export { router as attendanceRouter };

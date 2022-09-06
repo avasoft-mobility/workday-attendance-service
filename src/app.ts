@@ -35,7 +35,7 @@ app.use(
         query: payload.queryParams,
       },
       function (code: any, data: any) {
-        res.send(data);
+        res.status(code).send(data);
       }
     );
   }

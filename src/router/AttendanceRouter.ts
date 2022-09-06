@@ -67,10 +67,21 @@ router.post("/", async (request: Request, response: Response) => {
 router.get("/", async (req: Request, res: Response) => {
   try {
     if (req.query["userId"] && req.query["date"]) {
-      const status = await getAttendanceStatus(
+      const response = await getAttendanceStatus(
         req.query["date"] as string,
         req.query["userId"] as string
       );
+      
+      if (response.length === 0){
+        return res.status(404).send({message: "no records found"});
+      }
+
+      if (req.query["object"] === "true") {
+        return res.status(200).send(response[0]);
+      }
+
+      var status =
+        response.length > 0 ? response[0].attendance_status : "Not Filled";
 
       return res.status(200).send({ status: status });
     }

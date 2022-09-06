@@ -4,13 +4,10 @@ import AttendanceDb from "../schema/AttendanceSchema";
 const getAttendanceStatus = async (
   date: string,
   userId: string
-): Promise<string> => {
+): Promise<Attendance[]> => {
   const attendance = await getAttendance(date, userId);
 
-  var status =
-    attendance.length > 0 ? attendance[0].attendance_status : "Not Filled";
-
-  return status;
+  return attendance;
 };
 
 const getAttendanceForParticularDates = async (

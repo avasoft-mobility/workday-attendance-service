@@ -71,6 +71,10 @@ router.get("/", async (req: Request, res: Response) => {
         req.query["date"] as string,
         req.query["userId"] as string
       );
+      
+      if (response.length === 0){
+        return res.status(404).send({message: "no records found"});
+      }
 
       if (req.query["object"] === "true") {
         return res.status(200).send(response[0]);

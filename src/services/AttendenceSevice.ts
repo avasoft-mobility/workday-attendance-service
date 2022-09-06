@@ -1,3 +1,4 @@
+import moment from "moment";
 import Attendance from "../models/Attendance.model";
 import AttendanceDb from "../schema/AttendanceSchema";
 
@@ -15,13 +16,18 @@ const getAttendanceForParticularDates = async (
   fromDate: string,
   toDate: string
 ): Promise<Attendance[]> => {
+  const parsedFromDate = new Date(new Date(fromDate).setHours(0, 0, 0, 0));
+  const parsedToDate = new Date(new Date(toDate).setHours(0, 0, 0, 0));
+
+  console.log("parsedFromDate", parsedFromDate);
+  console.log("parsedToDate", parsedToDate);
+  console.log("userId", userId);
+
   const query = {
-    $and: [
-      { $gte: { date: fromDate } },
-      { $lte: { date: toDate } },
-      { microsoftUserID: userId },
-    ],
+    date: { $gte: parsedFromDate, $lte: moment(parsedToDate).add(1).toDate() },
+    microsoftUserID: userId,
   };
+
   let result = await AttendanceDb.find(query);
   var attendanceArray = JSON.parse(
     JSON.stringify(result)
@@ -76,6 +82,7 @@ const getAttendance = async (
   userId: string
 ): Promise<Attendance[]> => {
   const parsedDate = new Date(date);
+  console.log("parsedDate", parsedDate);
 
   let query = {
     microsoftUserID: userId,

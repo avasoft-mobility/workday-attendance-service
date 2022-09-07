@@ -108,8 +108,9 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/bulk-retrieve", async (req: Request, res: Response) => {
   try {
-    const userIds = req.body.userIds;
-    const date = req.body.date;
+    const json = JSON.parse(req.body);
+    const userIds = json.userIds;
+    const date = json.date;
 
     Rollbar.info("request", req)
 

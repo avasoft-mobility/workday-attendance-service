@@ -108,11 +108,8 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/bulk-retrieve", async (req: Request, res: Response) => {
   try {
-    const json = JSON.parse(req.body);
-    const userIds = json.userIds;
-    const date = json.date;
-
-    Rollbar.info("request", req)
+    const userIds = req.body.userIds;
+    const date = req.body.date;
 
     if (!userIds || (userIds as string[]).length === 0) {
       return res.status(400).send({ message: "User ids must be passed" });

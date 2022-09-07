@@ -42,7 +42,7 @@ app.use(
         query: payload.queryParams,
       },
       function (code: any, data: any) {
-        res.status(code).send(data);
+        res.status(code).json(data);
       }
     );
   }

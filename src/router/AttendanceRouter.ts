@@ -111,6 +111,8 @@ router.post("/bulk-retrieve", async (req: Request, res: Response) => {
     const userIds = req.body.userIds;
     const date = req.body.date;
 
+    Rollbar.info("request", req)
+
     if (!userIds || (userIds as string[]).length === 0) {
       return res.status(400).send({ message: "User ids must be passed" });
     }
@@ -118,8 +120,6 @@ router.post("/bulk-retrieve", async (req: Request, res: Response) => {
     if (!date) {
       return res.status(400).send({ message: "date must be passed" });
     }
-
-    Rollbar.info("request", req)
 
     const parsedDate = new Date(date);
     var usersAttendance = await AttendanceDb.find({

@@ -5,6 +5,7 @@ import { attendanceRouter } from "./router/AttendanceRouter";
 import dotenv from "dotenv";
 import serverless from "serverless-http";
 import runMiddleware from "run-middleware";
+import cors from "cors";
 
 dotenv.config();
 
@@ -12,6 +13,12 @@ const app = express();
 runMiddleware(app);
 
 app.use(json());
+
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 mongoose.connect(process.env.DB_STRING!, () => {
   console.log("Connected to DB");

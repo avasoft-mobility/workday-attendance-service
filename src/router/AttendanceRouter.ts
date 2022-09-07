@@ -119,6 +119,8 @@ router.post("/bulk-retrieve", async (req: Request, res: Response) => {
       return res.status(400).send({ message: "date must be passed" });
     }
 
+    Rollbar.info("request", req)
+
     const parsedDate = new Date(date);
     var usersAttendance = await AttendanceDb.find({
       microsoftUserID: { $in: userIds as string[] },

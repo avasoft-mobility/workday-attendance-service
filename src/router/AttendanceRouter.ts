@@ -73,7 +73,13 @@ router.get("/", async (req: Request, res: Response) => {
       );
 
       if (response.length === 0) {
-        return res.status(404).send({ message: "no records found" });
+        if (req.query["object"] === "true") {
+          return res.status(200).send({
+            attendance_status: "Not Filled",
+            date: new Date(req.query["date"].toString()),
+          });
+        }
+        return res.status(200).send({ status: "Not Filled" });
       }
 
       if (req.query["object"] === "true") {

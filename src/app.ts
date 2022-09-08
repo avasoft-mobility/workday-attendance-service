@@ -30,8 +30,9 @@ app.get("/", (request: Request, response: Response) => {
 
 app.use("/attendance", attendanceRouter);
 
+const functionNames = JSON.parse(process.env.LAMBDA_FUNCTION_NAMES!);
 app.use(
-  "/attendance/*/functions/AttendancesFunction/invocations",
+  `/attendance/*/functions/${functionNames.ATTENDANCE}/invocations`,
   (req: Request, res: Response) => {
     const payload = JSON.parse(Buffer.from(req.body).toString());
     (app as any).runMiddleware(

@@ -43,8 +43,6 @@ class LambdaClient {
   private getFunctionName = (service: Services): string => {
     const functionNames = JSON.parse(process.env.LAMBDA_FUNCTION_NAMES!);
 
-    return "AVA-HIVE-NP-WORKDAY-TODOS-BE-dev-app";
-
     if (service === "Mobile") {
       return functionNames.MOBILE;
     }

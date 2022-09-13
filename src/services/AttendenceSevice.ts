@@ -1,5 +1,7 @@
 import moment from "moment";
+import AttendanceStats from "../models/Attendance-Stats.model";
 import Attendance from "../models/Attendance.model";
+import ServiceResponse from "../models/Service-Response.model";
 import AttendanceDb from "../schema/AttendanceSchema";
 
 const getAttendanceStatus = async (
@@ -100,8 +102,79 @@ const getAttendance = async (
   return attendance;
 };
 
+const getMultiUserDateIntervalAttendance = async (
+  startDate: string,
+  endDate: string,
+  users: string[]
+) => {
+  const parsedFromDate = new Date(new Date(startDate).setHours(0, 0, 0, 0));
+  const parsedToDate = new Date(new Date(endDate).setHours(0, 0, 0, 0));
+
+  const query = {
+    date: { $gte: parsedFromDate, $lte: moment(parsedToDate).add(1).toDate() },
+    microsoftUserID: { $in: users },
+  };
+
+  let result = await AttendanceDb.find(query);
+  var attendanceArray = JSON.parse(
+    JSON.stringify(result)
+      .replace(new RegExp("_id", "g"), "id")
+      .replace(new RegExp("__v", "g"), "v")
+  );
+
+  return attendanceArray;
+};
+
+const getAttendanceForStats = async (
+  userId: string,
+  interestedDate: string,
+  startDate: string,
+  endDate: string,
+  reportings: string[]
+): Promise<ServiceResponse<AttendanceStats>> => {
+  if (!userId) {
+    return { code: 400, message: "User Id is required" };
+  }
+
+  if (!interestedDate) {
+    return { code: 400, message: "Interested Date is required" };
+  }
+
+  if (!startDate) {
+    return { code: 400, message: "Start Date is required" };
+  }
+
+  if (!endDate) {
+    return { code: 400, message: "End Date is required" };
+  }
+
+  const interestedDateAttendance = (await getAttendance(
+    interestedDate,
+    userId
+  )) as Attendance[];
+
+  const dateIntervelAttendance = (await getAttendanceForParticularDates(
+    userId,
+    startDate,
+    endDate
+  )) as Attendance[];
+
+  const reportingsDateIntervalAttendances =
+    await getMultiUserDateIntervalAttendance(startDate, endDate, reportings);
+
+  return {
+    code: 200,
+    body: {
+      dateIntervalAttendances: dateIntervelAttendance,
+      interestedDateAttendance: interestedDateAttendance,
+      reportingDateIntervalAttendances: reportingsDateIntervalAttendances,
+    },
+  };
+};
+
 export {
   getAttendanceStatus,
   getAttendanceForParticularDates,
   updateOrCraeteAttendance,
+  getAttendanceForStats,
 };

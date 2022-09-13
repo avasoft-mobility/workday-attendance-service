@@ -6,6 +6,7 @@ import {
   getAttendanceForParticularDates,
   getAttendanceStatus,
   updateOrCraeteAttendance,
+  getAttendanceForStats,
 } from "../services/AttendenceSevice";
 
 const router = express.Router();
@@ -144,6 +145,33 @@ router.post("/bulk-retrieve", async (req: Request, res: Response) => {
     return res
       .status(500)
       .send({ message: (error as unknown as Error).message });
+  }
+});
+
+router.post("/stats", async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId;
+    const interestedDate = req.body.interestedDate;
+    const startDate = req.body.startDate;
+    const endDate = req.body.endDate;
+    const reportings = req.body.reportings;
+
+    const response = await getAttendanceForStats(
+      userId as string,
+      interestedDate as string,
+      startDate as string,
+      endDate as string,
+      reportings
+    );
+
+    if (response.code === 200) {
+      return res.status(response.code).send(response.body);
+    }
+
+    return res.status(response.code).send({ message: response.message });
+  } catch (error) {
+    Rollbar.error(error as unknown as Error, req);
+    res.status(500).json({ message: (error as unknown as Error).message });
   }
 });
 

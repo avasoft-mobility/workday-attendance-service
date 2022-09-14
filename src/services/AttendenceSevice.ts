@@ -102,27 +102,25 @@ const getAttendance = async (
   return attendance;
 };
 
-const getMultiUserDateIntervalAttendance = async (
-  startDate: string,
-  endDate: string,
+const getMultiUserInterestedDateAttendance = async (
+  date: string,
   users: string[]
 ) => {
-  const parsedFromDate = new Date(new Date(startDate).setHours(0, 0, 0, 0));
-  const parsedToDate = new Date(new Date(endDate).setHours(0, 0, 0, 0));
+  const parsedDate = new Date(date);
 
-  const query = {
-    date: { $gte: parsedFromDate, $lte: moment(parsedToDate).add(1).toDate() },
+  let query = {
     microsoftUserID: { $in: users },
+    date: new Date(
+      new Date(
+        parsedDate.getFullYear(),
+        parsedDate.getMonth(),
+        parsedDate.getDate()
+      ).setHours(0, 0, 0, 0)
+    ),
   };
 
-  let result = await AttendanceDb.find(query);
-  var attendanceArray = JSON.parse(
-    JSON.stringify(result)
-      .replace(new RegExp("_id", "g"), "id")
-      .replace(new RegExp("__v", "g"), "v")
-  );
-
-  return attendanceArray;
+  let attendance: Attendance[] = await AttendanceDb.find(query);
+  return attendance;
 };
 
 const getAttendanceForStats = async (
@@ -159,15 +157,15 @@ const getAttendanceForStats = async (
     endDate
   )) as Attendance[];
 
-  const reportingsDateIntervalAttendances =
-    await getMultiUserDateIntervalAttendance(startDate, endDate, reportings);
+  const reportingInterestedDateAttendances =
+    await getMultiUserInterestedDateAttendance(interestedDate, reportings);
 
   return {
     code: 200,
     body: {
       dateIntervalAttendances: dateIntervelAttendance,
       interestedDateAttendance: interestedDateAttendance,
-      reportingDateIntervalAttendances: reportingsDateIntervalAttendances,
+      reportingInterestedDateAttendances: reportingInterestedDateAttendances,
     },
   };
 };

@@ -138,8 +138,7 @@ router.post("/bulk-retrieve", async (req: Request, res: Response) => {
       ),
     });
 
-    Rollbar.info("usersAttendance", usersAttendance, "request", req);
-    return res.send(usersAttendance);
+    return res.status(200).send(usersAttendance);
   } catch (error) {
     Rollbar.error(error as unknown as Error, req);
     return res
